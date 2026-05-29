@@ -234,7 +234,7 @@ export default function App() {
       </header>
 
       <main className="flex flex-col md:flex-row flex-1 overflow-hidden p-4 md:p-6 gap-4 md:gap-6">
-        <section className="flex-[2] flex flex-col gap-4 md:gap-6 overflow-y-auto min-h-0 relative">
+        <section className="w-full md:flex-1 min-w-0 flex flex-col gap-4 md:gap-6 overflow-y-auto min-h-0 relative">
           <div className="text-[11px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-md px-3 py-2">
             Ghi chú: chỉ <span className="font-bold">Tổng Kiểm Kê</span> hiển thị đầy đủ theo đ; các giá trị khác hiển thị theo đơn vị <span className="font-bold">k</span> (1k = 1.000đ).
           </div>
@@ -301,7 +301,7 @@ export default function App() {
           </div>
         </section>
 
-        <aside className="w-full flex flex-col gap-4 md:gap-6 overflow-y-auto min-h-0">
+        <aside className="w-full md:w-[380px] lg:w-[420px] xl:w-[460px] md:flex-none flex flex-col gap-4 md:gap-6 overflow-y-auto min-h-0">
           <div ref={reportRef} className="bg-emerald-600 dark:bg-emerald-800 rounded-2xl p-6 text-white shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20 relative overflow-hidden shrink-0">
             <div className="relative z-10">
               <p className="text-emerald-100 dark:text-emerald-200 text-xs font-bold uppercase tracking-[0.2em] mb-2">Tổng Kiểm Kê</p>
