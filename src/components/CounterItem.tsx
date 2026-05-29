@@ -19,7 +19,7 @@ export const CounterItem: React.FC<CounterItemProps> = ({
   onRemoveBatch
 }) => {
   const visibleBatches = batches.length > 0 ? batches : [0];
-  const formatMoney = (val: number) => new Intl.NumberFormat('vi-VN').format(val);
+  const formatK = (val: number) => `${new Intl.NumberFormat('vi-VN').format(Math.trunc(val / 1000))}k`;
 
   const handleChange = (batchIndex: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
@@ -62,7 +62,7 @@ export const CounterItem: React.FC<CounterItemProps> = ({
                 className="w-full min-w-[80px] max-w-[140px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded px-3 py-1.5 text-center font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-700 dark:text-slate-200 dark:placeholder-slate-600"
               />
               <span className="min-w-[100px] text-right text-[11px] font-mono font-semibold text-slate-500 dark:text-slate-400">
-                {formatMoney(value * (Number(quantity) || 0))} đ
+                {formatK(value * (Number(quantity) || 0))}
               </span>
               {visibleBatches.length > 1 && (
                 <button
@@ -86,7 +86,7 @@ export const CounterItem: React.FC<CounterItemProps> = ({
           </button>
         </div>
         <span className="flex-1 text-right font-mono text-slate-600 dark:text-slate-400 font-bold truncate pt-2">
-          {new Intl.NumberFormat('vi-VN').format(subtotal)} đ
+          {formatK(subtotal)}
         </span>
       </div>
     </div>

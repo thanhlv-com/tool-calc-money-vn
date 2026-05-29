@@ -185,6 +185,7 @@ export default function App() {
   };
 
   const formatMoney = (val: number) => new Intl.NumberFormat('vi-VN').format(val);
+  const formatK = (val: number) => `${new Intl.NumberFormat('vi-VN').format(Math.trunc(val / 1000))}k`;
 
   return (
     <div className="flex flex-col h-[100dvh] w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 overflow-hidden font-sans selection:bg-cyan-100 dark:selection:bg-cyan-900 selection:text-cyan-900 dark:selection:text-cyan-100">
@@ -232,6 +233,9 @@ export default function App() {
         
         {/* Left Column: Input Form */}
         <section className="flex-[2] flex flex-col gap-4 md:gap-6 overflow-y-auto min-h-0 relative">
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-md px-3 py-2">
+            Ghi chú: chỉ <span className="font-bold">Tổng Kiểm Kê</span> hiển thị đầy đủ theo đ; các giá trị khác hiển thị theo đơn vị <span className="font-bold">k</span> (1k = 1.000đ).
+          </div>
           
           <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex-shrink-0">
             <div className="bg-slate-50 dark:bg-slate-800/50 px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
@@ -345,7 +349,7 @@ export default function App() {
                            </span>
                         </div>
                         <span className="text-lg font-black text-emerald-700 dark:text-emerald-400">
-                          {formatMoney(item.totalSum)} <span className="text-sm font-medium">đ</span>
+                          {formatK(item.totalSum)}
                         </span>
                       </button>
                       
