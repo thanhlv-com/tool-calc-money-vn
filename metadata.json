@@ -1,0 +1,6 @@
+{
+  "name": "Money Counter Tool",
+  "description": "Công cụ đếm tiền Việt Nam với tính năng lưu lịch sử và xuất báo cáo PDF.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
