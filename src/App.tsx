@@ -44,6 +44,12 @@ const cloneCounts = (value: RecordCounts): RecordCounts =>
 const formatBatchBreakdown = (batches: number[] = []) =>
   batches.filter(qty => qty > 0).join(' + ');
 
+const formatBatchAmountBreakdown = (denomination: number, batches: number[] = []) =>
+  batches
+    .filter(qty => qty > 0)
+    .map(qty => new Intl.NumberFormat('vi-VN').format(denomination * qty))
+    .join(' + ');
+
 export default function App() {
   const [counts, setCounts] = useState<RecordCounts>({});
   const [showExtra, setShowExtra] = useState(false);
@@ -349,12 +355,19 @@ export default function App() {
                       const denominationBatches = counts[d.value] || [];
                       const denominationTotalQuantity = sumBatches(denominationBatches);
                       const batchLabel = formatBatchBreakdown(denominationBatches);
+                      const batchAmountLabel = formatBatchAmountBreakdown(d.value, denominationBatches);
+                      const hasBatchBreakdown = denominationBatches.filter(qty => qty > 0).length > 1;
 
                       return (
-                        <div key={d.value} className="flex justify-between items-center text-sm py-1.5 border-b border-slate-50 dark:border-slate-700/50 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-700/50 px-2 rounded -mx-2 transition-colors">
+                        <div key={d.value} className="flex justify-between items-start text-sm py-1.5 border-b border-slate-50 dark:border-slate-700/50 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-700/50 px-2 rounded -mx-2 transition-colors">
                           <span className="text-slate-600 dark:text-slate-300 font-bold w-16">{d.label}</span>
-                          <span className="text-slate-400 dark:text-slate-500 font-mono text-xs">
-                            x{batchLabel || denominationTotalQuantity}
+                          <span className="text-slate-400 dark:text-slate-500 font-mono text-xs text-left">
+                            <span className="block">x{batchLabel || denominationTotalQuantity}</span>
+                            {hasBatchBreakdown && (
+                              <span className="block text-[10px] leading-4">
+                                {batchAmountLabel} đ
+                              </span>
+                            )}
                           </span>
                           <span className="font-mono font-bold text-slate-800 dark:text-slate-100 flex-1 text-right">
                             {formatMoney(d.value * denominationTotalQuantity)} đ
