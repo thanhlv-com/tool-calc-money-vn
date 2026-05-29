@@ -348,10 +348,10 @@ export default function App() {
             © {new Date().getFullYear()} ThanhLV Tools. Cập nhật nội dung: {lastUpdated}. Chính sách cập nhật: rà soát định kỳ tính đúng của mệnh giá và giao diện hiển thị.
           </p>
           <nav className="flex flex-wrap gap-4">
-            <a href="#gioi-thieu" className="underline hover:text-emerald-600 dark:hover:text-emerald-400">Giới thiệu</a>
-            <a href="#faq" className="underline hover:text-emerald-600 dark:hover:text-emerald-400">FAQ</a>
-            <a href="#chinh-sach" className="underline hover:text-emerald-600 dark:hover:text-emerald-400">Chính sách</a>
-            <a href="mailto:hello@thanhlv.com" className="underline hover:text-emerald-600 dark:hover:text-emerald-400">Liên hệ</a>
+            <a href="/gioi-thieu/" className="underline hover:text-emerald-600 dark:hover:text-emerald-400">Giới thiệu</a>
+            <a href="/faq/" className="underline hover:text-emerald-600 dark:hover:text-emerald-400">FAQ</a>
+            <a href="/chinh-sach/" className="underline hover:text-emerald-600 dark:hover:text-emerald-400">Chính sách</a>
+            <a href="/lien-he/" className="underline hover:text-emerald-600 dark:hover:text-emerald-400">Liên hệ</a>
           </nav>
         </div>
       </footer>
