@@ -333,8 +333,8 @@ export default function App() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col flex-1 shrink-0 overflow-hidden relative">
-             <div ref={reportRef} className="p-5 md:p-6 bg-white dark:bg-slate-800 w-full h-full">
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col flex-1 shrink-0 min-h-0 overflow-y-auto relative">
+             <div ref={reportRef} className="p-5 md:p-6 bg-white dark:bg-slate-800 w-full">
                 <div className="text-center mb-6 border-b border-slate-100 dark:border-slate-700 pb-4">
                   <h2 className="text-xl font-black uppercase tracking-widest text-slate-800 dark:text-slate-100">Phiếu Kiểm Tiền</h2>
                   <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 font-medium">
@@ -342,7 +342,7 @@ export default function App() {
                   </p>
                 </div>
 
-                <div className="space-y-1 mb-4 h-full">
+                <div className="space-y-1 mb-4">
                   {!hasAnyQuantity && (
                     <div className="text-center text-slate-400 dark:text-slate-500 py-10 text-sm italic">
                       Chưa có số liệu...
