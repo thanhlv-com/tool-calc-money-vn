@@ -10,12 +10,20 @@ export interface CounterItemProps {
 
 export const CounterItem: React.FC<CounterItemProps> = ({ label, value, quantity, onChange }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value, 10);
-    onChange(value, isNaN(val) ? 0 : val);
+    const rawValue = e.target.value;
+    const digitsOnly = rawValue.replace(/\D/g, '');
+    const parsed = Number.parseInt(digitsOnly, 10);
+    onChange(value, Number.isNaN(parsed) ? 0 : parsed);
   };
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     e.target.select();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (['e', 'E', '+', '-', '.'].includes(e.key)) {
+      e.preventDefault();
+    }
   };
 
   const subtotal = value * quantity;
@@ -26,9 +34,13 @@ export const CounterItem: React.FC<CounterItemProps> = ({ label, value, quantity
       <input
         type="number"
         min="0"
+        step="1"
+        inputMode="numeric"
+        pattern="[0-9]*"
         value={quantity || ''}
         onChange={handleChange}
         onFocus={handleFocus}
+        onKeyDown={handleKeyDown}
         placeholder="0"
         className="flex-1 min-w-[80px] max-w-[140px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded px-3 py-1.5 text-center font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-700 dark:text-slate-200 dark:placeholder-slate-600"
       />
