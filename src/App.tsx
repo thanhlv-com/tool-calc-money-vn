@@ -41,15 +41,6 @@ const cloneCounts = (value: RecordCounts): RecordCounts =>
     Object.entries(value).map(([denomination, batches]) => [Number(denomination), [...batches]])
   ) as RecordCounts;
 
-const formatBatchBreakdown = (batches: number[] = []) =>
-  batches.filter(qty => qty > 0).join(' + ');
-
-const formatBatchAmountBreakdown = (denomination: number, batches: number[] = []) =>
-  batches
-    .filter(qty => qty > 0)
-    .map(qty => new Intl.NumberFormat('vi-VN').format(denomination * qty))
-    .join(' + ');
-
 export default function App() {
   const [counts, setCounts] = useState<RecordCounts>({});
   const [showExtra, setShowExtra] = useState(false);
@@ -142,12 +133,6 @@ export default function App() {
     (acc, [val, batches]) => acc + Number(val) * sumBatches(batches),
     0
   );
-
-  const totalNotes = (Object.values(counts) as number[][]).reduce(
-    (acc, batches) => acc + sumBatches(batches),
-    0
-  );
-  const hasAnyQuantity = totalNotes > 0;
 
   const handleSaveSession = () => {
     if (currentTotal === 0) return;
@@ -311,72 +296,18 @@ export default function App() {
         </section>
 
         {/* Right Column: Summary Report */}
-        <aside className="flex-[1.5] w-full flex flex-col gap-4 md:gap-6 overflow-y-auto min-h-0">
+        <aside className="w-full flex flex-col gap-4 md:gap-6 overflow-y-auto min-h-0">
           
-          <div className="bg-emerald-600 dark:bg-emerald-800 rounded-2xl p-6 text-white shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20 relative overflow-hidden shrink-0">
+          <div ref={reportRef} className="bg-emerald-600 dark:bg-emerald-800 rounded-2xl p-6 text-white shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20 relative overflow-hidden shrink-0">
             <div className="relative z-10">
-              <p className="text-emerald-100 dark:text-emerald-200 text-xs font-bold uppercase tracking-[0.2em] mb-2">Tổng Tiền Kiểm Kê</p>
-              <div className="text-4xl font-black mb-4">
+              <p className="text-emerald-100 dark:text-emerald-200 text-xs font-bold uppercase tracking-[0.2em] mb-2">Tổng Kiểm Kê</p>
+              <div className="text-4xl font-black">
                 {formatMoney(currentTotal)} <span className="text-lg">đ</span>
-              </div>
-              <div className="flex justify-between items-center pt-4 border-t border-emerald-500 dark:border-emerald-700">
-                <div className="text-center text-left">
-                  <p className="text-[10px] uppercase text-emerald-100 dark:text-emerald-200 font-semibold tracking-wider">Tổng Tờ</p>
-                  <p className="text-lg font-bold">
-                    {totalNotes}
-                  </p>
-                </div>
               </div>
             </div>
             <div className="absolute -right-4 -bottom-4 opacity-10">
               <Calculator className="w-32 h-32" />
             </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col flex-1 shrink-0 min-h-0 overflow-y-auto relative">
-             <div ref={reportRef} className="p-5 md:p-6 bg-white dark:bg-slate-800 w-full">
-                <div className="text-center mb-6 border-b border-slate-100 dark:border-slate-700 pb-4">
-                  <h2 className="text-xl font-black uppercase tracking-widest text-slate-800 dark:text-slate-100">Phiếu Kiểm Tiền</h2>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 font-medium">
-                    {format(new Date(), 'HH:mm - dd/MM/yyyy')}
-                  </p>
-                </div>
-
-                <div className="space-y-1 mb-4">
-                  {!hasAnyQuantity && (
-                    <div className="text-center text-slate-400 dark:text-slate-500 py-10 text-sm italic">
-                      Chưa có số liệu...
-                    </div>
-                  )}
-                  
-                  {[...MAIN_DENOMINATIONS, ...EXTRA_DENOMINATIONS]
-                    .filter(d => sumBatches(counts[d.value]) > 0)
-                    .map(d => {
-                      const denominationBatches = counts[d.value] || [];
-                      const denominationTotalQuantity = sumBatches(denominationBatches);
-                      const batchLabel = formatBatchBreakdown(denominationBatches);
-                      const batchAmountLabel = formatBatchAmountBreakdown(d.value, denominationBatches);
-                      const hasBatchBreakdown = denominationBatches.filter(qty => qty > 0).length > 1;
-
-                      return (
-                        <div key={d.value} className="flex justify-between items-start text-sm py-1.5 border-b border-slate-50 dark:border-slate-700/50 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-700/50 px-2 rounded -mx-2 transition-colors">
-                          <span className="text-slate-600 dark:text-slate-300 font-bold w-16">{d.label}</span>
-                          <span className="text-slate-400 dark:text-slate-500 font-mono text-xs text-left">
-                            <span className="block">x{batchLabel || denominationTotalQuantity}</span>
-                            {hasBatchBreakdown && (
-                              <span className="block text-[10px] leading-4">
-                                {batchAmountLabel} đ
-                              </span>
-                            )}
-                          </span>
-                          <span className="font-mono font-bold text-slate-800 dark:text-slate-100 flex-1 text-right">
-                            {formatMoney(d.value * denominationTotalQuantity)} đ
-                          </span>
-                        </div>
-                      );
-                    })}
-                </div>
-             </div>
           </div>
         </aside>
       </main>
