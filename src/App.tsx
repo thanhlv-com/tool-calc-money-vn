@@ -354,6 +354,18 @@ export default function App() {
             <Link to="/chinh-sach" className="underline hover:text-emerald-600 dark:hover:text-emerald-400">Chính sách</Link>
             <Link to="/lien-he" className="underline hover:text-emerald-600 dark:hover:text-emerald-400">Liên hệ</Link>
           </nav>
+          <p>
+            Xem nhiều tool khác tại{' '}
+            <a
+              href="https://link.thanhlv.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-emerald-600 dark:hover:text-emerald-400"
+            >
+              link.thanhlv.com
+            </a>
+            .
+          </p>
         </div>
       </footer>
 

@@ -22,6 +22,19 @@ function PageLayout({title, children}: {title: string; children: ReactNode}) {
           <h1 className="mb-4 text-2xl font-black tracking-tight">{title}</h1>
           <div className="space-y-4 text-sm text-slate-700 dark:text-slate-200">{children}</div>
         </main>
+
+        <footer className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+          Xem nhiều tool khác tại{' '}
+          <a
+            href="https://link.thanhlv.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold underline hover:text-emerald-600 dark:hover:text-emerald-400"
+          >
+            link.thanhlv.com
+          </a>
+          .
+        </footer>
       </div>
     </div>
   );
