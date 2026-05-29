@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { format } from 'date-fns';
 import { Download, History, Calculator, Save, Trash2, X, Sun, Moon, Monitor } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { MAIN_DENOMINATIONS, EXTRA_DENOMINATIONS, RecordCounts, HistoryItem, ThemeMode } from './types';
 import { CounterItem } from './components/CounterItem';
 
@@ -348,10 +349,10 @@ export default function App() {
             © {new Date().getFullYear()} ThanhLV Tools. Cập nhật nội dung: {lastUpdated}. Chính sách cập nhật: rà soát định kỳ tính đúng của mệnh giá và giao diện hiển thị.
           </p>
           <nav className="flex flex-wrap gap-4">
-            <a href="/gioi-thieu/" className="underline hover:text-emerald-600 dark:hover:text-emerald-400">Giới thiệu</a>
-            <a href="/faq/" className="underline hover:text-emerald-600 dark:hover:text-emerald-400">FAQ</a>
-            <a href="/chinh-sach/" className="underline hover:text-emerald-600 dark:hover:text-emerald-400">Chính sách</a>
-            <a href="/lien-he/" className="underline hover:text-emerald-600 dark:hover:text-emerald-400">Liên hệ</a>
+            <Link to="/gioi-thieu" className="underline hover:text-emerald-600 dark:hover:text-emerald-400">Giới thiệu</Link>
+            <Link to="/faq" className="underline hover:text-emerald-600 dark:hover:text-emerald-400">FAQ</Link>
+            <Link to="/chinh-sach" className="underline hover:text-emerald-600 dark:hover:text-emerald-400">Chính sách</Link>
+            <Link to="/lien-he" className="underline hover:text-emerald-600 dark:hover:text-emerald-400">Liên hệ</Link>
           </nav>
         </div>
       </footer>
