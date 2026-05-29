@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://calc-money-vn-tools.thanhlv.com/sitemap.xml

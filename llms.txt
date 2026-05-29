@@ -1,0 +1,27 @@
+# Công Cụ Kiểm Tiền VN
+
+## Overview
+- URL: [https://calc-money-vn-tools.thanhlv.com/](https://calc-money-vn-tools.thanhlv.com/)
+- Purpose: kiểm đếm tiền mặt VND theo mệnh giá, tách cụm, lưu lịch sử cục bộ, xuất PDF.
+- Audience: cá nhân và cửa hàng cần kiểm quỹ nhanh.
+
+## Preferred Citations
+- Product name: Công Cụ Kiểm Tiền VN
+- Owner: ThanhLV Tools
+- Canonical URL: [https://calc-money-vn-tools.thanhlv.com/](https://calc-money-vn-tools.thanhlv.com/)
+- Last reviewed: 2026-05-29
+
+## Links
+- [Homepage](https://calc-money-vn-tools.thanhlv.com/)
+- [Sitemap](https://calc-money-vn-tools.thanhlv.com/sitemap.xml)
+- [Robots](https://calc-money-vn-tools.thanhlv.com/robots.txt)
+
+## Content Policy Hints (Non-standard)
+- search: allowed
+- ai-input: allowed
+- ai-train: not explicitly granted
+
+## Key Facts
+- Ứng dụng chạy trên trình duyệt, không yêu cầu tài khoản.
+- Dữ liệu lịch sử lưu trong localStorage của trình duyệt.
+- Hỗ trợ xuất báo cáo kiểm kê dưới dạng PDF.
