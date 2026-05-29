@@ -18,13 +18,14 @@ export const EXTRA_DENOMINATIONS: Denomination[] = [
   { value: 1000, label: '1,000₫' },
 ];
 
-export type RecordCounts = Record<number, number>;
+export type RecordCounts = Record<number, number[]>;
+export type LegacyRecordCounts = Record<number, number | number[]>;
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
 export interface HistoryItem {
   id: string;
   timestamp: string;
-  counts: RecordCounts;
+  counts: LegacyRecordCounts;
   totalSum: number;
 }

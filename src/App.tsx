@@ -2,9 +2,47 @@ import React, { useState, useEffect, useRef } from 'react';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { format } from 'date-fns';
-import { Download, History, Calculator, Save, ChevronDown, ChevronUp, Trash2, X, Sun, Moon, Monitor } from 'lucide-react';
+import { Download, History, Calculator, Save, Trash2, X, Sun, Moon, Monitor } from 'lucide-react';
 import { MAIN_DENOMINATIONS, EXTRA_DENOMINATIONS, RecordCounts, HistoryItem, ThemeMode } from './types';
 import { CounterItem } from './components/CounterItem';
+
+const sumBatches = (batches: number[] = []) =>
+  batches.reduce((acc, qty) => acc + (Number(qty) || 0), 0);
+
+const normalizeBatches = (value: unknown): number[] => {
+  const source = Array.isArray(value) ? value : [value];
+  return source
+    .map(item => Number(item))
+    .filter(item => Number.isFinite(item) && item > 0)
+    .map(item => Math.floor(item));
+};
+
+const normalizeCounts = (value: unknown): RecordCounts => {
+  if (!value || typeof value !== 'object') {
+    return {};
+  }
+
+  const normalized: RecordCounts = {};
+  Object.entries(value as Record<string, unknown>).forEach(([key, rawBatches]) => {
+    const denomination = Number(key);
+    if (!Number.isFinite(denomination)) return;
+
+    const batches = normalizeBatches(rawBatches);
+    if (batches.length > 0) {
+      normalized[denomination] = batches;
+    }
+  });
+
+  return normalized;
+};
+
+const cloneCounts = (value: RecordCounts): RecordCounts =>
+  Object.fromEntries(
+    Object.entries(value).map(([denomination, batches]) => [Number(denomination), [...batches]])
+  ) as RecordCounts;
+
+const formatBatchBreakdown = (batches: number[] = []) =>
+  batches.filter(qty => qty > 0).join(' + ');
 
 export default function App() {
   const [counts, setCounts] = useState<RecordCounts>({});
@@ -20,7 +58,14 @@ export default function App() {
     const saved = localStorage.getItem('money-counter-history');
     if (saved) {
       try {
-        setHistory(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const normalizedHistory = parsed.map((item): HistoryItem => ({
+            ...item,
+            counts: normalizeCounts(item?.counts)
+          }));
+          setHistory(normalizedHistory);
+        }
       } catch (e) {
         console.error('Failed to parse history', e);
       }
@@ -55,26 +100,57 @@ export default function App() {
     localStorage.setItem('money-counter-history', JSON.stringify(newHistory));
   };
 
-  const handleQuantityChange = (value: number, quantity: number) => {
-    setCounts(prev => ({ ...prev, [value]: quantity }));
+  const handleBatchChange = (value: number, batchIndex: number, quantity: number) => {
+    setCounts(prev => {
+      const nextBatches = [...(prev[value] ?? [0])];
+      nextBatches[batchIndex] = quantity;
+      return { ...prev, [value]: nextBatches };
+    });
+  };
+
+  const handleAddBatch = (value: number) => {
+    setCounts(prev => {
+      const nextBatches = [...(prev[value] ?? [])];
+      nextBatches.push(0);
+      return { ...prev, [value]: nextBatches };
+    });
+  };
+
+  const handleRemoveBatch = (value: number, batchIndex: number) => {
+    setCounts(prev => {
+      const nextBatches = [...(prev[value] ?? [])];
+      if (nextBatches.length <= 1) {
+        return { ...prev, [value]: [0] };
+      }
+
+      nextBatches.splice(batchIndex, 1);
+      return { ...prev, [value]: nextBatches };
+    });
   };
 
   const clearCounts = () => {
     setCounts({});
   };
 
-  const currentTotal = Object.entries(counts).reduce((acc, [val, qty]) => {
-    const numericQty = Number(qty) || 0;
-    return acc + Number(val) * numericQty;
-  }, 0);
+  const currentTotal = (Object.entries(counts) as Array<[string, number[]]>).reduce(
+    (acc, [val, batches]) => acc + Number(val) * sumBatches(batches),
+    0
+  );
+
+  const totalNotes = (Object.values(counts) as number[][]).reduce(
+    (acc, batches) => acc + sumBatches(batches),
+    0
+  );
+  const hasAnyQuantity = totalNotes > 0;
 
   const handleSaveSession = () => {
     if (currentTotal === 0) return;
+    const cleanedCounts = normalizeCounts(counts);
     
     const newItem: HistoryItem = {
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
-      counts: { ...counts },
+      counts: cloneCounts(cleanedCounts),
       totalSum: currentTotal
     };
 
@@ -87,7 +163,7 @@ export default function App() {
   };
 
   const loadHistoryItem = (item: HistoryItem) => {
-    setCounts(item.counts);
+    setCounts(normalizeCounts(item.counts));
     setShowHistory(false);
   };
 
@@ -177,8 +253,10 @@ export default function App() {
                   key={denom.value}
                   label={denom.label}
                   value={denom.value}
-                  quantity={counts[denom.value] || 0}
-                  onChange={handleQuantityChange}
+                  batches={counts[denom.value] || []}
+                  onBatchChange={handleBatchChange}
+                  onAddBatch={handleAddBatch}
+                  onRemoveBatch={handleRemoveBatch}
                 />
               ))}
             </div>
@@ -198,8 +276,10 @@ export default function App() {
                     key={denom.value}
                     label={denom.label}
                     value={denom.value}
-                    quantity={counts[denom.value] || 0}
-                    onChange={handleQuantityChange}
+                    batches={counts[denom.value] || []}
+                    onBatchChange={handleBatchChange}
+                    onAddBatch={handleAddBatch}
+                    onRemoveBatch={handleRemoveBatch}
                   />
                 ))}
               </div>
@@ -237,7 +317,7 @@ export default function App() {
                 <div className="text-center text-left">
                   <p className="text-[10px] uppercase text-emerald-100 dark:text-emerald-200 font-semibold tracking-wider">Tổng Tờ</p>
                   <p className="text-lg font-bold">
-                    {Object.values(counts).reduce((a: number, b) => a + (Number(b) || 0), 0)}
+                    {totalNotes}
                   </p>
                 </div>
               </div>
@@ -257,23 +337,31 @@ export default function App() {
                 </div>
 
                 <div className="space-y-1 mb-4 h-full">
-                  {Object.keys(counts).length === 0 && (
+                  {!hasAnyQuantity && (
                     <div className="text-center text-slate-400 dark:text-slate-500 py-10 text-sm italic">
                       Chưa có số liệu...
                     </div>
                   )}
                   
                   {[...MAIN_DENOMINATIONS, ...EXTRA_DENOMINATIONS]
-                    .filter(d => counts[d.value] > 0)
-                    .map(d => (
-                      <div key={d.value} className="flex justify-between items-center text-sm py-1.5 border-b border-slate-50 dark:border-slate-700/50 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-700/50 px-2 rounded -mx-2 transition-colors">
-                        <span className="text-slate-600 dark:text-slate-300 font-bold w-16">{d.label}</span>
-                        <span className="text-slate-400 dark:text-slate-500 font-mono text-xs">x{counts[d.value]}</span>
-                        <span className="font-mono font-bold text-slate-800 dark:text-slate-100 flex-1 text-right">
-                          {formatMoney(d.value * counts[d.value])} đ
-                        </span>
-                      </div>
-                  ))}
+                    .filter(d => sumBatches(counts[d.value]) > 0)
+                    .map(d => {
+                      const denominationBatches = counts[d.value] || [];
+                      const denominationTotalQuantity = sumBatches(denominationBatches);
+                      const batchLabel = formatBatchBreakdown(denominationBatches);
+
+                      return (
+                        <div key={d.value} className="flex justify-between items-center text-sm py-1.5 border-b border-slate-50 dark:border-slate-700/50 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-700/50 px-2 rounded -mx-2 transition-colors">
+                          <span className="text-slate-600 dark:text-slate-300 font-bold w-16">{d.label}</span>
+                          <span className="text-slate-400 dark:text-slate-500 font-mono text-xs">
+                            x{batchLabel || denominationTotalQuantity}
+                          </span>
+                          <span className="font-mono font-bold text-slate-800 dark:text-slate-100 flex-1 text-right">
+                            {formatMoney(d.value * denominationTotalQuantity)} đ
+                          </span>
+                        </div>
+                      );
+                    })}
                 </div>
              </div>
           </div>
