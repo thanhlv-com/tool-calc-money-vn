@@ -59,6 +59,7 @@ export const CounterItem: React.FC<CounterItemProps> = ({
                 onFocus={handleFocus}
                 onKeyDown={handleKeyDown}
                 placeholder="0"
+                aria-label={`Số lượng tờ mệnh giá ${label}, cụm ${index + 1}`}
                 className="w-full min-w-[80px] max-w-[140px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded px-3 py-1.5 text-center font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-700 dark:text-slate-200 dark:placeholder-slate-600"
               />
               <span className="min-w-[100px] text-right text-[11px] font-mono font-semibold text-slate-500 dark:text-slate-400">
@@ -70,6 +71,7 @@ export const CounterItem: React.FC<CounterItemProps> = ({
                   onClick={() => onRemoveBatch(value, index)}
                   className="p-1.5 text-slate-400 hover:text-rose-500 dark:text-slate-500 dark:hover:text-rose-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors"
                   title="Xóa cụm"
+                  aria-label={`Xóa cụm ${index + 1} của mệnh giá ${label}`}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -80,6 +82,7 @@ export const CounterItem: React.FC<CounterItemProps> = ({
             type="button"
             onClick={() => onAddBatch(value)}
             className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
+            aria-label={`Thêm cụm cho mệnh giá ${label}`}
           >
             <Plus className="w-3 h-3" />
             Thêm cụm

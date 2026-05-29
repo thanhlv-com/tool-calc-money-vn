@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { jsPDF } from 'jspdf';
-import html2canvas from 'html2canvas';
 import { format } from 'date-fns';
 import { Download, History, Calculator, Save, Trash2, X, Sun, Moon, Monitor } from 'lucide-react';
 import { MAIN_DENOMINATIONS, EXTRA_DENOMINATIONS, RecordCounts, HistoryItem, ThemeMode } from './types';
@@ -48,7 +46,7 @@ export default function App() {
   const [isExporting, setIsExporting] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [themeProvider, setThemeProvider] = useState<ThemeMode>('system');
-  
+
   const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -137,7 +135,7 @@ export default function App() {
   const handleSaveSession = () => {
     if (currentTotal === 0) return;
     const cleanedCounts = normalizeCounts(counts);
-    
+
     const newItem: HistoryItem = {
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
@@ -145,7 +143,7 @@ export default function App() {
       totalSum: currentTotal
     };
 
-    saveHistory([newItem, ...history].slice(0, 50)); // keep last 50
+    saveHistory([newItem, ...history].slice(0, 50));
     clearCounts();
   };
 
@@ -163,9 +161,13 @@ export default function App() {
     setIsExporting(true);
 
     try {
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf')
+      ]);
       const canvas = await html2canvas(reportRef.current, { scale: 2, useCORS: true });
       const imgData = canvas.toDataURL('image/png');
-      
+
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -186,11 +188,10 @@ export default function App() {
 
   const formatMoney = (val: number) => new Intl.NumberFormat('vi-VN').format(val);
   const formatK = (val: number) => `${new Intl.NumberFormat('vi-VN').format(Math.trunc(val / 1000))}k`;
+  const lastUpdated = format(new Date(), 'dd/MM/yyyy');
 
   return (
-    <div className="flex flex-col h-[100dvh] w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 overflow-hidden font-sans selection:bg-cyan-100 dark:selection:bg-cyan-900 selection:text-cyan-900 dark:selection:text-cyan-100">
-      
-      {/* Header Section */}
+    <div className="flex flex-col min-h-[100dvh] w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 overflow-hidden font-sans selection:bg-cyan-100 dark:selection:bg-cyan-900 selection:text-cyan-900 dark:selection:text-cyan-100">
       <header className="flex items-center justify-between px-4 md:px-6 py-4 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center text-white">
@@ -208,12 +209,14 @@ export default function App() {
             onClick={cycleTheme}
             className="flex items-center justify-center bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 w-9 md:w-10 h-9 md:h-10 rounded-md transition-colors border border-slate-300 dark:border-slate-600"
             title={`Chế độ: ${themeProvider}`}
+            aria-label={`Chuyển giao diện. Chế độ hiện tại: ${themeProvider}`}
           >
             {themeProvider === 'light' ? <Sun className="w-4 h-4" /> : themeProvider === 'dark' ? <Moon className="w-4 h-4" /> : <Monitor className="w-4 h-4" />}
           </button>
           <button
             onClick={() => setShowHistory(true)}
             className="flex items-center gap-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 px-3 md:px-4 py-2 rounded-md font-semibold text-xs md:text-sm transition-colors border border-slate-300 dark:border-slate-600"
+            aria-label="Mở lịch sử kiểm đếm"
           >
             <History className="w-4 h-4" />
             <span className="hidden md:inline">Lịch Sử</span>
@@ -222,6 +225,7 @@ export default function App() {
             onClick={exportPDF}
             disabled={currentTotal === 0 || isExporting}
             className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 md:px-4 py-2 rounded-md font-semibold text-xs md:text-sm transition-shadow shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label="Xuất báo cáo PDF"
           >
             {isExporting ? <span className="animate-pulse">...</span> : <Download className="w-4 h-4 md:w-5 md:h-5" />}
             <span className="hidden md:inline">Xuất PDF</span>
@@ -230,16 +234,14 @@ export default function App() {
       </header>
 
       <main className="flex flex-col md:flex-row flex-1 overflow-hidden p-4 md:p-6 gap-4 md:gap-6">
-        
-        {/* Left Column: Input Form */}
         <section className="flex-[2] flex flex-col gap-4 md:gap-6 overflow-y-auto min-h-0 relative">
           <div className="text-[11px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-md px-3 py-2">
             Ghi chú: chỉ <span className="font-bold">Tổng Kiểm Kê</span> hiển thị đầy đủ theo đ; các giá trị khác hiển thị theo đơn vị <span className="font-bold">k</span> (1k = 1.000đ).
           </div>
-          
+
           <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex-shrink-0">
             <div className="bg-slate-50 dark:bg-slate-800/50 px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
-              <h3 className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Mệnh Giá Phổ Biến</h3>
+              <h2 className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Mệnh Giá Phổ Biến</h2>
               <span className="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-black rounded">PHỔ BIẾN</span>
             </div>
             <div className="divide-y divide-slate-100 dark:divide-slate-700">
@@ -259,13 +261,13 @@ export default function App() {
 
           <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex-shrink-0">
             <div className="bg-slate-50 dark:bg-slate-800/50 px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
-              <h3 className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Mệnh Giá Nhỏ</h3>
-              <button onClick={() => setShowExtra(!showExtra)} className="text-[10px] text-emerald-600 dark:text-emerald-500 font-bold hover:underline">
+              <h2 className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Mệnh Giá Nhỏ</h2>
+              <button onClick={() => setShowExtra(!showExtra)} className="text-[10px] text-emerald-600 dark:text-emerald-500 font-bold hover:underline" aria-expanded={showExtra} aria-controls="extra-denominations">
                 {showExtra ? 'THU GỌN' : '+ HIỂN THỊ TẤT CẢ'}
               </button>
             </div>
             {showExtra && (
-              <div className="divide-y divide-slate-100 dark:divide-slate-700 animate-in fade-in slide-in-from-top-2 duration-300">
+              <div id="extra-denominations" className="divide-y divide-slate-100 dark:divide-slate-700 animate-in fade-in slide-in-from-top-2 duration-300">
                 {EXTRA_DENOMINATIONS.map(denom => (
                   <CounterItem
                     key={denom.value}
@@ -280,9 +282,9 @@ export default function App() {
               </div>
             )}
           </div>
-            
+
           <div className="flex gap-3 shrink-0 pb-6 mt-auto px-[1px]">
-             <button
+            <button
               onClick={clearCounts}
               className="flex-1 py-3 px-4 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 rounded-md font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors uppercase tracking-wider text-xs md:text-sm"
             >
@@ -299,9 +301,7 @@ export default function App() {
           </div>
         </section>
 
-        {/* Right Column: Summary Report */}
         <aside className="w-full flex flex-col gap-4 md:gap-6 overflow-y-auto min-h-0">
-          
           <div ref={reportRef} className="bg-emerald-600 dark:bg-emerald-800 rounded-2xl p-6 text-white shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20 relative overflow-hidden shrink-0">
             <div className="relative z-10">
               <p className="text-emerald-100 dark:text-emerald-200 text-xs font-bold uppercase tracking-[0.2em] mb-2">Tổng Kiểm Kê</p>
@@ -313,23 +313,62 @@ export default function App() {
               <Calculator className="w-32 h-32" />
             </div>
           </div>
+
+          <section id="gioi-thieu" className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 md:p-5 space-y-2">
+            <h2 className="text-sm font-black uppercase tracking-wide text-slate-700 dark:text-slate-200">Giới thiệu công cụ</h2>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              Công cụ hỗ trợ kiểm đếm tiền mặt VND theo mệnh giá, phù hợp cho kiểm quỹ cuối ngày, đối soát thu chi và lưu báo cáo nhanh.
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Dữ liệu lịch sử được lưu cục bộ trên trình duyệt của bạn. Không cần tài khoản để sử dụng.
+            </p>
+          </section>
+
+          <section id="faq" className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 md:p-5 space-y-3">
+            <h2 className="text-sm font-black uppercase tracking-wide text-slate-700 dark:text-slate-200">Câu hỏi thường gặp</h2>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Công cụ có miễn phí không?</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-300">Có. Bạn có thể dùng miễn phí để kiểm đếm và xuất PDF ngay trên trình duyệt.</p>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Làm sao để tách nhiều bó cùng mệnh giá?</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-300">Dùng nút Thêm cụm ở từng mệnh giá để nhập nhiều nhóm số lượng riêng.</p>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Dữ liệu của tôi được lưu ở đâu?</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-300">Lịch sử được lưu trong localStorage của trình duyệt trên thiết bị hiện tại.</p>
+            </div>
+          </section>
         </aside>
       </main>
 
-      {/* History Modal Overlay */}
+      <footer id="chinh-sach" className="shrink-0 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 md:px-6 py-4">
+        <div className="flex flex-col gap-2 text-xs text-slate-600 dark:text-slate-300">
+          <p>
+            © {new Date().getFullYear()} ThanhLV Tools. Cập nhật nội dung: {lastUpdated}. Chính sách cập nhật: rà soát định kỳ tính đúng của mệnh giá và giao diện hiển thị.
+          </p>
+          <nav className="flex flex-wrap gap-4">
+            <a href="#gioi-thieu" className="underline hover:text-emerald-600 dark:hover:text-emerald-400">Giới thiệu</a>
+            <a href="#faq" className="underline hover:text-emerald-600 dark:hover:text-emerald-400">FAQ</a>
+            <a href="#chinh-sach" className="underline hover:text-emerald-600 dark:hover:text-emerald-400">Chính sách</a>
+            <a href="mailto:hello@thanhlv.com" className="underline hover:text-emerald-600 dark:hover:text-emerald-400">Liên hệ</a>
+          </nav>
+        </div>
+      </footer>
+
       {showHistory && (
         <div className="fixed inset-0 bg-slate-900/60 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80">
               <div className="flex items-center gap-3">
                 <History className="w-5 h-5 text-emerald-600 dark:text-emerald-500" />
-                <h3 className="text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">Lịch sử kiểm đếm</h3>
+                <h2 className="text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">Lịch sử kiểm đếm</h2>
               </div>
-              <button onClick={() => setShowHistory(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+              <button onClick={() => setShowHistory(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" aria-label="Đóng lịch sử kiểm đếm">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="p-5 overflow-y-auto flex-1 bg-white dark:bg-slate-800">
               {history.length === 0 ? (
                 <div className="text-center py-12 text-slate-400 dark:text-slate-500 text-sm italic">
@@ -341,24 +380,25 @@ export default function App() {
                     <div key={item.id} className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between hover:border-emerald-300 dark:hover:border-emerald-500 transition-colors group">
                       <button className="flex-1 text-left flex flex-col cursor-pointer" onClick={() => loadHistoryItem(item)}>
                         <div className="flex items-baseline gap-2 mb-1">
-                           <span className="text-xs font-bold text-slate-800 dark:text-slate-300 tracking-wide uppercase">
-                             Lịch sử lưu
-                           </span>
-                           <span className="text-xs text-slate-500 dark:text-slate-400 font-mono group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                             {format(new Date(item.timestamp), 'dd/MM/yyyy HH:mm')}
-                           </span>
+                          <span className="text-xs font-bold text-slate-800 dark:text-slate-300 tracking-wide uppercase">
+                            Lịch sử lưu
+                          </span>
+                          <span className="text-xs text-slate-500 dark:text-slate-400 font-mono group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                            {format(new Date(item.timestamp), 'dd/MM/yyyy HH:mm')}
+                          </span>
                         </div>
                         <span className="text-lg font-black text-emerald-700 dark:text-emerald-400">
                           {formatK(item.totalSum)}
                         </span>
                       </button>
-                      
+
                       <button
                         onClick={() => removeHistoryItem(item.id)}
                         className="p-2 text-slate-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors ml-4"
                         title="Xóa"
+                        aria-label="Xóa bản ghi lịch sử"
                       >
-                         <Trash2 className="w-5 h-5" />
+                        <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
                   ))}
